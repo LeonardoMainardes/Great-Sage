@@ -12,9 +12,18 @@
   "app": {
     "windows": [
       {
-        "title": "great-sage",
-        "width": 800,
-        "height": 600
+        "label": "main",
+        "title": "Grande Sábio",
+        "width": 180,
+        "height": 180,
+        "x": 1750,
+        "y": 5,
+        "resizable": false,
+        "decorations": false,
+        "transparent": true,
+        "alwaysOnTop": true,
+        "skipTaskbar": true,
+        "shadow": false
       }
     ],
     "security": {
