@@ -5,35 +5,48 @@ import "./App.css";
 
 function App() {
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const window = getCurrentWindow();
 
   useEffect(() => {
-    const window = getCurrentWindow();
+  const unlisten = window.onMoved(() => {
+    if (saveTimer.current) {
+      clearTimeout(saveTimer.current);
+    }
 
-    const unlisten = window.onMoved(() => {
-      if (saveTimer.current) {
-        clearTimeout(saveTimer.current);
-      }
+    saveTimer.current = setTimeout(async () => {
+      await saveWindowState(StateFlags.POSITION);
+    }, 300);
+  });
 
-      saveTimer.current = setTimeout(async () => {
-        await saveWindowState(StateFlags.POSITION);
-      }, 300);
-    });
+  return () => {
+    if (saveTimer.current) {
+      clearTimeout(saveTimer.current);
+    }
 
-    return () => {
-      if (saveTimer.current) {
-        clearTimeout(saveTimer.current);
-      }
+    unlisten.then((fn) => fn());
+  };
+}, []);
 
-      unlisten.then((fn) => fn());
-    };
-  }, []);
+  const toggleVisibility = async () => {
+    const visible = await window.isVisible();
+
+    if (visible) {
+      await window.hide();
+    } else {
+      await window.show();
+    }
+  }
 
   return (
-    <main className="nucleus-container">
+    <>
+      <button onClick={toggleVisibility}>Toggle</button>
+
+      <main className="nucleus-container">
       <div className="nucleus">
         <div className="nucleus-core" data-tauri-drag-region />
       </div>
     </main>
+    </>
   );
 }
 
