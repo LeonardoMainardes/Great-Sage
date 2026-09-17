@@ -1,13 +1,15 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { saveWindowState, StateFlags } from "@tauri-apps/plugin-window-state";
-import { register, unregister} from "@tauri-apps/plugin-global-shortcut";
-import "./App.css";
+import { register, unregister } from "@tauri-apps/plugin-global-shortcut";
+import Nucleus from "./components/nucleus";
+import { NucleusState } from "./components/nucleus/types";
 
 function App() {
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const window = getCurrentWindow();
-  
+  const [nucleusState, _setNucleusState] = useState<NucleusState>("IDLE");
+
   const toggleVisibility = async () => {
     const visible = await window.isVisible();
 
@@ -16,11 +18,11 @@ function App() {
     } else {
       await window.show();
     }
-  }
+  };
 
   useEffect(() => {
     async function registerShortcut() {
-       await register("CommandOrControl+G", (event) => {
+      await register("CommandOrControl+G", (event) => {
         if (event.state === "Pressed") {
           toggleVisibility();
         }
@@ -54,15 +56,7 @@ function App() {
     };
   }, []);
 
-  return (
-    <>
-      <main className="nucleus-container">
-      <div className="nucleus">
-        <div className="nucleus-core" data-tauri-drag-region />
-      </div>
-    </main>
-    </>
-  );
+  return <Nucleus state={nucleusState} />;
 }
 
 export default App;
