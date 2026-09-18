@@ -4,6 +4,7 @@ import { saveWindowState, StateFlags } from "@tauri-apps/plugin-window-state";
 import { register, unregister } from "@tauri-apps/plugin-global-shortcut";
 import Nucleus from "./components/nucleus";
 import { NucleusState } from "./components/nucleus/types";
+import { enable } from "@tauri-apps/plugin-autostart";
 
 function App() {
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -21,6 +22,16 @@ function App() {
   };
 
   useEffect(() => {
+    async function setupAutostart() {
+      try {
+        await enable();
+      } catch (error) {
+        console.error("Failed to enable autostart:", error);
+      }
+    }
+
+    setupAutostart();
+
     async function registerShortcut() {
       await register("CommandOrControl+G", (event) => {
         if (event.state === "Pressed") {
