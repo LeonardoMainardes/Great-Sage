@@ -1,3 +1,60 @@
+@import "tailwindcss";
+@theme {
+  --animate-nucleusIdle: nucleusIdle 3s ease-in-out infinite;
+
+  @keyframes nucleusIdle {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+
+    50% {
+      transform: scale(1.08);
+    }
+  }
+
+  --animate-nucleusListening: nucleusListening 1.5s ease-in-out infinite;
+
+  @keyframes nucleusListening {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+
+    50% {
+      transform: scale(1.12);
+    }
+  }
+
+  --animate-nucleusThinking: nucleusThinking 2s ease-in-out infinite;
+
+  @keyframes nucleusThinking {
+    0%,
+    100% {
+      transform: scale(1) rotate(0deg);
+    }
+
+    50% {
+      transform: scale(1.1) rotate(4deg);
+    }
+  }
+
+  --animate-nucleusSpeaking: nucleusSpeaking 0.6s ease-in-out infinite;
+
+  @keyframes nucleusSpeaking {
+    0%,
+    50%,
+    75%,
+    100% {
+      transform: scale(1);
+    }
+
+    25% {
+      transform: scale(1.15);
+    }
+  }
+}
+
 html,
 body,
 #root {
@@ -9,100 +66,4 @@ body,
 
 body {
   overflow: hidden;
-}
-
-.nucleus-container {
-  width: 100%;
-  height: 100%;
-  clip-path: circle(50% at 50% 50%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.nucleus {
-  width: 90px;
-  height: 90px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.nucleus-core {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-
-  background: radial-gradient(
-    circle,
-    white 0%,
-    rgb(250, 180, 255) 35%,
-    rgba(255, 80, 249, 0.8) 70%,
-    transparent 100%
-  );
-
-  box-shadow:
-    0 0 12px white,
-    0 0 25px rgba(255, 100, 247, 0.9);
-}
-
-.nucleus.idle {
-  background: radial-gradient(
-    circle,
-    rgba(255, 190, 248, 0.95) 0%,
-    rgba(255, 70, 243, 0.5) 35%,
-    rgba(255, 40, 251, 0.15) 65%,
-    transparent 75%
-  );
-
-  box-shadow:
-    0 0 15px rgba(255, 120, 244, 0.9),
-    0 0 35px rgba(255, 70, 230, 0.6),
-    0 0 60px rgba(255, 50, 248, 0.35);
-}
-
-.nucleus.listening {
-  background: radial-gradient(
-    circle,
-    rgba(190, 231, 255, 0.95) 0%,
-    rgba(70, 166, 255, 0.5) 35%,
-    rgba(40, 140, 255, 0.15) 65%,
-    transparent 75%
-  );
-
-  box-shadow:
-    0 0 15px rgba(120, 194, 255, 0.9),
-    0 0 35px rgba(70, 166, 255, 0.6),
-    0 0 60px rgba(50, 139, 255, 0.35);
-}
-
-.nucleus.thinking {
-  background: radial-gradient(
-    circle,
-    rgba(243, 255, 190, 0.95) 0%,
-    rgba(243, 255, 70, 0.5) 35%,
-    rgba(255, 241, 40, 0.15) 65%,
-    transparent 75%
-  );
-
-  box-shadow:
-    0 0 15px rgba(255, 246, 120, 0.9),
-    0 0 35px rgba(255, 227, 70, 0.6),
-    0 0 60px rgba(252, 255, 50, 0.35);
-}
-
-.nucleus.speaking {
-  background: radial-gradient(
-    circle,
-    rgba(192, 255, 190, 0.95) 0%,
-    rgba(101, 255, 70, 0.5) 35%,
-    rgba(76, 255, 40, 0.15) 65%,
-    transparent 75%
-  );
-
-  box-shadow:
-    0 0 15px rgba(147, 255, 120, 0.9),
-    0 0 35px rgba(101, 255, 70, 0.6),
-    0 0 60px rgba(74, 255, 50, 0.35);
 }
