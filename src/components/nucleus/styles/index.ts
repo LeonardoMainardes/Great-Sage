@@ -23,7 +23,7 @@ export const nucleusCoreStyles: Record<NucleusState, string> = {
     "bg-[radial-gradient(circle,_white_0%,_rgb(180,255,180)_35%,_rgba(80,255,80,0.8)_70%,_transparent_100%)] shadow-[0_0_12px_white,0_0_25px_rgba(80,255,80,0.9)]",
 };
 
-export const nucleusStylesAnimation: Record<NucleusState, string> = {
+export const nucleusAnimationStyles: Record<NucleusState, string> = {
   IDLE: "animate-nucleusIdle",
   LISTENING: "animate-nucleusListening",
   THINKING: "animate-nucleusThinking",

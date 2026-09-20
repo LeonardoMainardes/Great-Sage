@@ -1,16 +1,19 @@
-import React from "react";
 import { NucleusState } from "./types";
 import {
   nucleusCoreStyles,
   nucleusStyles,
-  nucleusStylesAnimation,
-} from "./style";
+  nucleusAnimationStyles,
+} from "./styles";
 
-const Nucleus: React.FC<{ state: NucleusState }> = ({ state }) => {
+interface NucleusProps {
+  state: NucleusState;
+}
+
+const Nucleus = ({ state }: NucleusProps) => {
   return (
-    <main className={`w-full h-full flex items-center justify-center`}>
+    <main className="w-full h-full flex items-center justify-center">
       <div
-        className={`w-[90px] h-[90px] rounded-full flex items-center justify-center ${nucleusStyles[state]}  ${nucleusStylesAnimation[state]}`}
+        className={`w-[90px] h-[90px] rounded-full flex items-center justify-center ${nucleusStyles[state]} ${nucleusAnimationStyles[state]}`}
       >
         <div
           className={`w-7 h-7 rounded-full ${nucleusCoreStyles[state]}`}
