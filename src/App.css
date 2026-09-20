@@ -44,12 +44,12 @@
   @keyframes nucleusSpeaking {
     0%,
     50%,
-    75%,
     100% {
       transform: scale(1);
     }
 
-    25% {
+    25%,
+    75% {
       transform: scale(1.15);
     }
   }

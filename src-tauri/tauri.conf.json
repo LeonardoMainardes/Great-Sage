@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "great-sage",
+  "productName": "Great Sage",
   "version": "0.1.0",
   "identifier": "com.leona.great-sage",
   "build": {

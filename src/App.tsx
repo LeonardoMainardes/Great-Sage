@@ -4,12 +4,12 @@ import { saveWindowState, StateFlags } from "@tauri-apps/plugin-window-state";
 import { register, unregister } from "@tauri-apps/plugin-global-shortcut";
 import Nucleus from "./components/nucleus";
 import { NucleusState } from "./components/nucleus/types";
-import { enable } from "@tauri-apps/plugin-autostart";
+import { enable, isEnabled } from "@tauri-apps/plugin-autostart";
 
 function App() {
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const window = getCurrentWindow();
-  const [nucleusState, _setNucleusState] = useState<NucleusState>("IDLE");
+  const [nucleusState] = useState<NucleusState>("IDLE");
 
   const toggleVisibility = async () => {
     const visible = await window.isVisible();
@@ -24,31 +24,59 @@ function App() {
   useEffect(() => {
     async function setupAutostart() {
       try {
-        await enable();
+        const autostartEnabled = await isEnabled();
+
+        if (!autostartEnabled) {
+          await enable();
+        }
       } catch (error) {
         console.error("Failed to enable autostart:", error);
       }
     }
 
     setupAutostart();
+  }, []);
 
+  useEffect(() => {
     async function registerShortcut() {
-      await register("CommandOrControl+G", (event) => {
-        if (event.state === "Pressed") {
-          toggleVisibility();
-        }
-      });
+      try {
+        await register("CommandOrControl+G", (event) => {
+          if (event.state === "Pressed") {
+            toggleVisibility();
+          }
+        });
+      } catch (error) {
+        console.error("Failed to register global shortcut:", error);
+      }
     }
 
     registerShortcut();
 
+    return () => {
+      async function unregisterShortcut() {
+        try {
+          await unregister("CommandOrControl+G");
+        } catch (error) {
+          console.error("Failed to unregister global shortcut:", error);
+        }
+      }
+
+      unregisterShortcut();
+    };
+  }, []);
+
+  useEffect(() => {
     const unlisten = window.onMoved(() => {
       if (saveTimer.current) {
         clearTimeout(saveTimer.current);
       }
 
       saveTimer.current = setTimeout(async () => {
-        await saveWindowState(StateFlags.POSITION);
+        try {
+          await saveWindowState(StateFlags.POSITION);
+        } catch (error) {
+          console.error("Failed to save window position:", error);
+        }
       }, 300);
     });
 
@@ -58,12 +86,6 @@ function App() {
       }
 
       unlisten.then((fn) => fn());
-
-      async function unregisterShortcut() {
-        await unregister("CommandOrControl+G");
-      }
-
-      unregisterShortcut();
     };
   }, []);
 
