@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "great-sage",
+  "productName": "Great Sage",
   "version": "0.1.0",
   "identifier": "com.leona.great-sage",
   "build": {
@@ -12,9 +12,18 @@
   "app": {
     "windows": [
       {
-        "title": "great-sage",
-        "width": 800,
-        "height": 600
+        "label": "main",
+        "title": "Grande Sábio",
+        "width": 250,
+        "height": 250,
+        "x": 1750,
+        "y": 5,
+        "resizable": false,
+        "decorations": false,
+        "transparent": true,
+        "alwaysOnTop": true,
+        "skipTaskbar": true,
+        "shadow": false
       }
     ],
     "security": {

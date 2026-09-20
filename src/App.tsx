@@ -1,51 +1,95 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import { invoke } from "@tauri-apps/api/core";
-import "./App.css";
+import { useEffect, useRef, useState } from "react";
+import { getCurrentWindow } from "@tauri-apps/api/window";
+import { saveWindowState, StateFlags } from "@tauri-apps/plugin-window-state";
+import { register, unregister } from "@tauri-apps/plugin-global-shortcut";
+import Nucleus from "./components/nucleus";
+import { NucleusState } from "./components/nucleus/types";
+import { enable, isEnabled } from "@tauri-apps/plugin-autostart";
 
 function App() {
-  const [greetMsg, setGreetMsg] = useState("");
-  const [name, setName] = useState("");
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const window = getCurrentWindow();
+  const [nucleusState] = useState<NucleusState>("IDLE");
 
-  async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    setGreetMsg(await invoke("greet", { name }));
-  }
+  const toggleVisibility = async () => {
+    const visible = await window.isVisible();
 
-  return (
-    <main className="container">
-      <h1>Welcome to Tauri + React</h1>
+    if (visible) {
+      await window.hide();
+    } else {
+      await window.show();
+    }
+  };
 
-      <div className="row">
-        <a href="https://vite.dev" target="_blank">
-          <img src="/vite.svg" className="logo vite" alt="Vite logo" />
-        </a>
-        <a href="https://tauri.app" target="_blank">
-          <img src="/tauri.svg" className="logo tauri" alt="Tauri logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <p>Click on the Tauri, Vite, and React logos to learn more.</p>
+  useEffect(() => {
+    async function setupAutostart() {
+      try {
+        const autostartEnabled = await isEnabled();
 
-      <form
-        className="row"
-        onSubmit={(e) => {
-          e.preventDefault();
-          greet();
-        }}
-      >
-        <input
-          id="greet-input"
-          onChange={(e) => setName(e.currentTarget.value)}
-          placeholder="Enter a name..."
-        />
-        <button type="submit">Greet</button>
-      </form>
-      <p>{greetMsg}</p>
-    </main>
-  );
+        if (!autostartEnabled) {
+          await enable();
+        }
+      } catch (error) {
+        console.error("Failed to enable autostart:", error);
+      }
+    }
+
+    setupAutostart();
+  }, []);
+
+  useEffect(() => {
+    async function registerShortcut() {
+      try {
+        await register("CommandOrControl+G", (event) => {
+          if (event.state === "Pressed") {
+            toggleVisibility();
+          }
+        });
+      } catch (error) {
+        console.error("Failed to register global shortcut:", error);
+      }
+    }
+
+    registerShortcut();
+
+    return () => {
+      async function unregisterShortcut() {
+        try {
+          await unregister("CommandOrControl+G");
+        } catch (error) {
+          console.error("Failed to unregister global shortcut:", error);
+        }
+      }
+
+      unregisterShortcut();
+    };
+  }, []);
+
+  useEffect(() => {
+    const unlisten = window.onMoved(() => {
+      if (saveTimer.current) {
+        clearTimeout(saveTimer.current);
+      }
+
+      saveTimer.current = setTimeout(async () => {
+        try {
+          await saveWindowState(StateFlags.POSITION);
+        } catch (error) {
+          console.error("Failed to save window position:", error);
+        }
+      }, 300);
+    });
+
+    return () => {
+      if (saveTimer.current) {
+        clearTimeout(saveTimer.current);
+      }
+
+      unlisten.then((fn) => fn());
+    };
+  }, []);
+
+  return <Nucleus state={nucleusState} />;
 }
 
 export default App;
