@@ -1,3 +1,4 @@
+import { startVoiceCapture, stopVoiceCapture } from "../voice/voice";
 import { InteractionStatus } from "./types";
 
 interface ToggleInteractionStatusProps {
@@ -14,16 +15,26 @@ export function stopInteraction(): InteractionStatus {
 
 let interactionStatus: InteractionStatus = "INACTIVE";
 
-export function toggleInteractionStatus({
+export async function toggleInteractionStatus({
   onStatusChange,
 }: ToggleInteractionStatusProps) {
   if (interactionStatus === "INACTIVE") {
-    const newStatus = startInteraction();
-    interactionStatus = newStatus;
-    onStatusChange(newStatus);
+    try {
+      const voiceStatus = await startVoiceCapture();
+
+      if (voiceStatus === "ACTIVE") {
+        const newStatus = startInteraction();
+        interactionStatus = newStatus;
+        onStatusChange(newStatus);
+      }
+    } catch (error) {
+      console.error("Error starting voice capture:", error);
+    }
   } else if (interactionStatus === "ACTIVE") {
     const newStatus = stopInteraction();
     interactionStatus = newStatus;
     onStatusChange(newStatus);
+
+    stopVoiceCapture();
   }
 }
