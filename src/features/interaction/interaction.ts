@@ -1,8 +1,11 @@
-import { startVoiceCapture, stopVoiceCapture } from "../voice/voice";
+import { startSpeechDetection, stopSpeechDetection } from "../voice/speech";
+import { startVoiceCapture, stopVoiceCapture } from "../voice/";
 import { InteractionStatus } from "./types";
+import { SpeechStatus } from "../voice/speech/types";
 
 interface ToggleInteractionStatusProps {
   onStatusChange: (status: InteractionStatus) => void;
+  onSpeechStatusChange: (status: SpeechStatus) => void;
 }
 
 export function startInteraction(): InteractionStatus {
@@ -17,12 +20,18 @@ let interactionStatus: InteractionStatus = "INACTIVE";
 
 export async function toggleInteractionStatus({
   onStatusChange,
+  onSpeechStatusChange,
 }: ToggleInteractionStatusProps) {
   if (interactionStatus === "INACTIVE") {
     try {
-      const voiceStatus = await startVoiceCapture();
+      const voiceResult = await startVoiceCapture();
 
-      if (voiceStatus === "ACTIVE") {
+      if (voiceResult.stream && voiceResult.status === "ACTIVE") {
+        await startSpeechDetection({
+          stream: voiceResult.stream,
+          onSpeechStatusChange,
+        });
+
         const newStatus = startInteraction();
         interactionStatus = newStatus;
         onStatusChange(newStatus);
@@ -34,6 +43,8 @@ export async function toggleInteractionStatus({
     const newStatus = stopInteraction();
     interactionStatus = newStatus;
     onStatusChange(newStatus);
+
+    stopSpeechDetection();
 
     stopVoiceCapture();
   }

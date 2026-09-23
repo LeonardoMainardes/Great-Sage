@@ -15,7 +15,7 @@ function App() {
   const [_interactionStatus, setInteractionStatus] =
     useState<InteractionStatus>("INACTIVE");
 
-  const [nucleusState] = useState<NucleusState>("IDLE");
+  const [nucleusState, setNucleusState] = useState<NucleusState>("IDLE");
 
   const toggleVisibility = async () => {
     const visible = await window.isVisible();
@@ -34,7 +34,13 @@ function App() {
           if (event.state === "Pressed") {
             toggleInteractionStatus({
               onStatusChange: (status: InteractionStatus) => {
+                if (status === "INACTIVE") {
+                  setNucleusState("IDLE");
+                }
                 setInteractionStatus(status);
+              },
+              onSpeechStatusChange: (status) => {
+                setNucleusState(status === "SPEECH" ? "LISTENING" : "IDLE");
               },
             });
           }
