@@ -1,5 +1,10 @@
 import { SpeechStatus } from "./types";
 
+interface StartSpeechDetectionProps {
+  onSpeechStatusChange: (status: SpeechStatus) => void;
+  stream: MediaStream;
+}
+
 let audioAnalyzer: AnalyserNode | null = null;
 
 let audioContext: AudioContext | null = null;
@@ -7,6 +12,8 @@ let audioContext: AudioContext | null = null;
 let audioStreamSource: MediaStreamAudioSourceNode | null = null;
 
 let requestAnimationFrameValue: number | null = null;
+
+let lastSpeechStatus: SpeechStatus | null = null;
 
 function calculateAudioLevel(dataArray: Uint8Array<ArrayBuffer>): number {
   let sum = 0;
@@ -23,7 +30,10 @@ function calculateAudioLevel(dataArray: Uint8Array<ArrayBuffer>): number {
   return rms;
 }
 
-function analyzeAudio(dataArray: Uint8Array<ArrayBuffer>) {
+function analyzeAudio(
+  dataArray: Uint8Array<ArrayBuffer>,
+  onStatusChange: (status: SpeechStatus) => void,
+) {
   if (audioAnalyzer) {
     audioAnalyzer.getByteTimeDomainData(dataArray);
 
@@ -31,10 +41,14 @@ function analyzeAudio(dataArray: Uint8Array<ArrayBuffer>) {
 
     const speechStatus = detectSpeech(audioLevel);
 
-    console.log("Audio Level:", audioLevel, "Speech Status:", speechStatus);
+    if (speechStatus !== lastSpeechStatus) {
+      lastSpeechStatus = speechStatus;
+
+      onStatusChange(speechStatus);
+    }
   }
   requestAnimationFrameValue = requestAnimationFrame(() =>
-    analyzeAudio(dataArray),
+    analyzeAudio(dataArray, onStatusChange),
   );
 }
 
@@ -48,7 +62,10 @@ function detectSpeech(audioLevel: number): SpeechStatus {
   return "SILENCE";
 }
 
-export async function startSpeechDetection(stream: MediaStream) {
+export async function startSpeechDetection({
+  stream,
+  onSpeechStatusChange,
+}: StartSpeechDetectionProps) {
   audioContext = new AudioContext();
 
   await audioContext.resume();
@@ -64,7 +81,7 @@ export async function startSpeechDetection(stream: MediaStream) {
   const bufferLength = audioAnalyzer.frequencyBinCount;
   const dataArray = new Uint8Array(new ArrayBuffer(bufferLength));
 
-  analyzeAudio(dataArray);
+  analyzeAudio(dataArray, onSpeechStatusChange);
 }
 
 export async function stopSpeechDetection() {
@@ -87,4 +104,6 @@ export async function stopSpeechDetection() {
   audioContext = null;
 
   audioAnalyzer = null;
+
+  lastSpeechStatus = null;
 }
