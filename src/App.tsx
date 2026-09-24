@@ -7,6 +7,7 @@ import { NucleusState } from "./components/nucleus/types";
 import { enable, isEnabled } from "@tauri-apps/plugin-autostart";
 import { toggleInteractionStatus } from "./features/interaction/interaction";
 import { InteractionStatus } from "./features/interaction/types";
+import Response from "./components/response";
 
 function App() {
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -16,6 +17,7 @@ function App() {
     useState<InteractionStatus>("INACTIVE");
 
   const [nucleusState, setNucleusState] = useState<NucleusState>("IDLE");
+  const [currentResponse, setCurrentResponse] = useState<string | null>(null);
 
   const toggleVisibility = async () => {
     const visible = await window.isVisible();
@@ -133,7 +135,12 @@ function App() {
     };
   }, []);
 
-  return <Nucleus state={nucleusState} />;
+  return (
+    <div>
+      {currentResponse && <Response text={currentResponse} />}
+      <Nucleus state={nucleusState} />
+    </div>
+  );
 }
 
 export default App;
