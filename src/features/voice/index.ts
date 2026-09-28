@@ -1,3 +1,4 @@
+import { startAudioProcessing, stopAudioProcessing } from "./audio/audio";
 import { VoiceStatus } from "./types";
 
 let mediaStream: MediaStream | null = null;
@@ -8,6 +9,8 @@ export async function startVoiceCapture(): Promise<{
 }> {
   try {
     mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+    await startAudioProcessing(mediaStream);
   } catch (error) {
     console.error("Error starting voice capture:", error);
     return { status: "ERROR", stream: null };
@@ -24,5 +27,6 @@ export function stopVoiceCapture(): VoiceStatus {
     });
   }
   mediaStream = null;
+  stopAudioProcessing();
   return "INACTIVE";
 }
