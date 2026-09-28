@@ -1,3 +1,5 @@
+import { AudioProcessorMessage } from "./types";
+
 class AudioProcessor extends AudioWorkletProcessor {
   process(
     inputs: Float32Array[][],
@@ -8,10 +10,12 @@ class AudioProcessor extends AudioWorkletProcessor {
 
     if (!input || input.length === 0) return true;
 
-    this.port.postMessage({
+    const message: AudioProcessorMessage = {
       type: "audio-samples",
       samples: input,
-    });
+    };
+
+    this.port.postMessage(message);
 
     return true;
   }
