@@ -1,4 +1,7 @@
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
+
+mod speech;
+
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_autostart::Builder::new().build())
@@ -7,4 +10,5 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+
 }
