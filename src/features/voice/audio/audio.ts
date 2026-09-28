@@ -14,6 +14,16 @@ export const startAudioProcessing = async (stream: MediaStream) => {
     "audio-processor",
   );
 
+  audioWorkletNode.port.onmessage = (event) => {
+    if (event.data.type === "audio-samples") {
+      const samples = event.data.samples as Float32Array;
+      console.log(
+        "Received audio samples from AudioWorkletProcessor:",
+        samples.length,
+      );
+    }
+  };
+
   audioSource.connect(audioWorkletNode);
 };
 

@@ -8,7 +8,10 @@ class AudioProcessor extends AudioWorkletProcessor {
 
     if (!input || input.length === 0) return true;
 
-    console.log("AudioProcessor: Received audio samples:", input.length);
+    this.port.postMessage({
+      type: "audio-samples",
+      samples: input,
+    });
 
     return true;
   }
