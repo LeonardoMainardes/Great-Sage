@@ -45,13 +45,17 @@ export const startAudioProcessing = async (stream: MediaStream) => {
       const speechEnd =
         speechEndDetector?.update(isSpeech ? "speech" : "silence") ?? false;
 
+      audioChunk?.add(samples);
+
       if (speechEnd) {
         const completedChunk = audioChunk?.complete();
 
-        console.log("Completed chunk:", completedChunk);
-      }
+        audioChunk = new Chunk();
 
-      audioChunk?.add(samples);
+        audioChunk.start();
+
+        console.log("Completed chunk:", completedChunk?.length);
+      }
     }
   };
 
