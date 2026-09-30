@@ -2,6 +2,7 @@ import { AudioProcessorMessage } from "./types";
 import { Chunk } from "./chunk";
 import { SpeechDetector } from "./speech";
 import { SpeechEndDetector } from "./speech-end";
+import { CompletedAudioProcessor } from "./completed-audio-processor";
 
 let audioContext: AudioContext | null = null;
 
@@ -10,6 +11,8 @@ let audioChunk: Chunk | null = null;
 let speechDetector: SpeechDetector | null = null;
 
 let speechEndDetector: SpeechEndDetector | null = null;
+
+let completedAudioProcessor: CompletedAudioProcessor | null = null;
 
 export const startAudioProcessing = async (stream: MediaStream) => {
   audioContext = new AudioContext();
@@ -21,6 +24,8 @@ export const startAudioProcessing = async (stream: MediaStream) => {
   speechDetector = new SpeechDetector();
 
   speechEndDetector = new SpeechEndDetector();
+
+  completedAudioProcessor = new CompletedAudioProcessor();
 
   await audioContext.audioWorklet.addModule(
     new URL("./processor.ts", import.meta.url),
@@ -50,11 +55,13 @@ export const startAudioProcessing = async (stream: MediaStream) => {
       if (speechEnd) {
         const completedChunk = audioChunk?.complete();
 
+        if (completedChunk) {
+          completedAudioProcessor?.process(completedChunk);
+        }
+
         audioChunk = new Chunk();
 
         audioChunk.start();
-
-        console.log("Completed chunk:", completedChunk?.length);
       }
     }
   };
@@ -70,6 +77,8 @@ export const stopAudioProcessing = async () => {
   if (audioChunk) {
     audioChunk.reset();
   }
+
+  completedAudioProcessor = null;
 
   speechDetector = null;
 
