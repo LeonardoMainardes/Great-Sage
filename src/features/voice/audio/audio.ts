@@ -1,14 +1,16 @@
 import { AudioProcessorMessage } from "./types";
-import { Buffer } from "./buffer";
+import { Chunk } from "./chunk";
 
 let audioContext: AudioContext | null = null;
 
-let audioBuffer: Buffer | null = null;
+let audioChunk: Chunk | null = null;
 
 export const startAudioProcessing = async (stream: MediaStream) => {
   audioContext = new AudioContext();
 
-  audioBuffer = new Buffer();
+  audioChunk = new Chunk();
+
+  audioChunk.start();
 
   await audioContext.audioWorklet.addModule(
     new URL("./processor.ts", import.meta.url),
@@ -28,7 +30,7 @@ export const startAudioProcessing = async (stream: MediaStream) => {
     if (message.type === "audio-samples") {
       const samples = message.samples;
 
-      audioBuffer?.add(samples);
+      audioChunk?.add(samples);
     }
   };
 
@@ -40,11 +42,11 @@ export const stopAudioProcessing = async () => {
     await audioContext.close();
   }
 
-  if (audioBuffer) {
-    audioBuffer.clear();
+  if (audioChunk) {
+    audioChunk.reset();
   }
 
-  audioBuffer = null;
+  audioChunk = null;
 
   audioContext = null;
 };
