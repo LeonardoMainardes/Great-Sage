@@ -39,7 +39,7 @@ export const startAudioProcessing = async (stream: MediaStream) => {
     "audio-processor",
   );
 
-  audioWorkletNode.port.onmessage = (
+  audioWorkletNode.port.onmessage = async (
     event: MessageEvent<AudioProcessorMessage>,
   ) => {
     const message = event.data;
@@ -62,7 +62,8 @@ export const startAudioProcessing = async (stream: MediaStream) => {
             1,
             completedChunk,
           );
-          completedAudioProcessor?.process(audioData);
+          const audioPayload =
+            await completedAudioProcessor?.process(audioData);
         }
 
         audioChunk = new Chunk();
