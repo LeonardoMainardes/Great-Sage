@@ -3,6 +3,7 @@ import { Chunk } from "./chunk";
 import { SpeechDetector } from "./speech";
 import { SpeechEndDetector } from "./speech-end";
 import { CompletedAudioProcessor } from "./completed-audio-processor";
+import { AudioDataTypes } from "./audio-data";
 
 let audioContext: AudioContext | null = null;
 
@@ -56,7 +57,12 @@ export const startAudioProcessing = async (stream: MediaStream) => {
         const completedChunk = audioChunk?.complete();
 
         if (completedChunk) {
-          completedAudioProcessor?.process(completedChunk);
+          const audioData = new AudioDataTypes(
+            audioContext?.sampleRate ?? 0,
+            1,
+            completedChunk,
+          );
+          completedAudioProcessor?.process(audioData);
         }
 
         audioChunk = new Chunk();
