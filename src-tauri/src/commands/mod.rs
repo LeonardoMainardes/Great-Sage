@@ -1,30 +1,31 @@
-use crate::speech::resample_audio;
+use tauri::State;
+use whisper_rs::WhisperContext;
+
+use crate::speech::{resample_audio, transcribe_audio};
 
 #[derive(serde::Deserialize)]
 pub struct AudioPayload {
-    sample_rate: u32,
-    channels: u16,
     data: Vec<u8>,
 }
 
 #[tauri::command]
-pub fn receive_audio(payload: AudioPayload) -> Result<Vec<f32>, String> {
-    println!("payload data length: {}", payload.data.len());
-
-    let sample_rate = payload.sample_rate;
-    let channels = payload.channels;
-
+pub fn receive_audio(payload: AudioPayload, context: State<WhisperContext>) -> Result<String, String> {
     let f32_samples = convert_bytes_to_f32(&payload.data);
 
-    println!("Received audio with number of samples: {}", f32_samples.len());
+    if f32_samples.is_empty() {
+        return Err("Received audio data is empty.".to_string());
+    }
 
     let resampled_samples = resample_audio(f32_samples);
-    
-    let resampled_sample_rate = 16000;
 
-    println!("Resampled audio with sample rate: {}, channels: {}, number of samples: {}", resampled_sample_rate, channels, resampled_samples.len());
+    if resampled_samples.is_empty() {
+        return Err("Resampled audio data is empty.".to_string());
+    }
     
-    Ok(resampled_samples)
+    let transcribed_audio = transcribe_audio(&context, &resampled_samples)
+        .map_err(|e| format!("Error during transcription: {:?}", e))?;
+    
+    Ok(transcribed_audio)
 }
 
 pub fn convert_bytes_to_f32(audio_bytes: &[u8]) -> Vec<f32> {
