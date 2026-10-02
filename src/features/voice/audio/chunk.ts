@@ -24,7 +24,9 @@ export class Chunk {
     if (this.status === "RECORDING") {
       this.status = "COMPLETED";
 
-      return this.buffer.get();
+      const completed = this.buffer.get();
+
+      return completed;
     }
 
     return new Float32Array(0);

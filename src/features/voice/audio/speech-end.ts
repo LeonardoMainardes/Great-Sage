@@ -1,7 +1,7 @@
 export class SpeechEndDetector {
   private silenceFrames = 0;
   private speechDetected = false;
-  private readonly silenceThreshold: number = 3;
+  private readonly silenceThreshold: number = 75;
 
   public update(state: "speech" | "silence"): boolean {
     switch (state) {

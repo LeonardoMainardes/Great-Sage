@@ -8,7 +8,31 @@ export async function startVoiceCapture(): Promise<{
   stream: MediaStream | null;
 }> {
   try {
-    mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const devices = await navigator.mediaDevices.enumerateDevices();
+
+    const microphone = devices.find(
+      (device) =>
+        device.kind === "audioinput" &&
+        device.deviceId !== "default" &&
+        device.deviceId !== "communications",
+    );
+
+    if (!microphone) {
+      throw new Error("Microphone not found");
+    }
+
+    mediaStream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        deviceId: {
+          exact: microphone.deviceId,
+        },
+        autoGainControl: true,
+        echoCancellation: true,
+        noiseSuppression: true,
+        channelCount: 1,
+        sampleRate: 48000,
+      },
+    });
 
     await startAudioProcessing(mediaStream);
   } catch (error) {

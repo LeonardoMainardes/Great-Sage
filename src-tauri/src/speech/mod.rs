@@ -52,7 +52,7 @@ pub fn resample_audio(sample: Vec<f32>) -> Vec<f32> {
     }
 }
 
-pub fn transcribe_audio(context: &WhisperContext, audio: Vec<f32>) -> Result<String, WhisperError> {
+pub fn transcribe_audio(context: &WhisperContext, sample: &[f32]) -> Result<String, WhisperError> {
     let mut state = match context.create_state() {
         Ok(state) => state,
         Err(e) => {
@@ -66,12 +66,9 @@ pub fn transcribe_audio(context: &WhisperContext, audio: Vec<f32>) -> Result<Str
     let mut params = FullParams::new(sampling_strategy);
     
     params.set_language(Some("pt"));
+    params.set_no_speech_thold(0.6);
 
-    let audio = resample_audio( audio );
-
-    println!("Audio samples length: {}", audio.len());
-
-    match state.full(params, &audio) {
+    match state.full(params, &sample) {
         Ok(()) => (),
         Err(e) => {
             eprintln!("Error during transcription: {:?}", e);
