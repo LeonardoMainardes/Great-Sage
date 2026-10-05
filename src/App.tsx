@@ -5,11 +5,19 @@ import { register, unregister } from "@tauri-apps/plugin-global-shortcut";
 import Nucleus from "./components/nucleus";
 import { NucleusState } from "./components/nucleus/types";
 import { enable, isEnabled } from "@tauri-apps/plugin-autostart";
+import { toggleInteractionStatus } from "./features/interaction/interaction";
+import { InteractionStatus } from "./features/interaction/types";
+import Response from "./components/response";
 
 function App() {
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const window = getCurrentWindow();
-  const [nucleusState] = useState<NucleusState>("IDLE");
+
+  const [_interactionStatus, setInteractionStatus] =
+    useState<InteractionStatus>("INACTIVE");
+
+  const [nucleusState, setNucleusState] = useState<NucleusState>("IDLE");
+  const [currentResponse, setCurrentResponse] = useState<string | null>(null);
 
   const toggleVisibility = async () => {
     const visible = await window.isVisible();
@@ -20,6 +28,44 @@ function App() {
       await window.show();
     }
   };
+
+  useEffect(() => {
+    async function interactionShortcut() {
+      try {
+        await register("CommandOrControl+B", (event) => {
+          if (event.state === "Pressed") {
+            toggleInteractionStatus({
+              onStatusChange: (status: InteractionStatus) => {
+                if (status === "INACTIVE") {
+                  setNucleusState("IDLE");
+                }
+                setInteractionStatus(status);
+              },
+              onSpeechStatusChange: (status) => {
+                setNucleusState(status === "SPEECH" ? "LISTENING" : "IDLE");
+              },
+            });
+          }
+        });
+      } catch (error) {
+        console.error("Failed to register global shortcut:", error);
+      }
+    }
+
+    interactionShortcut();
+
+    return () => {
+      async function unregisterShortcut() {
+        try {
+          await unregister("CommandOrControl+B");
+        } catch (error) {
+          console.error("Failed to unregister global shortcut:", error);
+        }
+      }
+
+      unregisterShortcut();
+    };
+  }, []);
 
   useEffect(() => {
     async function setupAutostart() {
@@ -89,7 +135,12 @@ function App() {
     };
   }, []);
 
-  return <Nucleus state={nucleusState} />;
+  return (
+    <div>
+      {currentResponse && <Response text={currentResponse} />}
+      <Nucleus state={nucleusState} />
+    </div>
+  );
 }
 
 export default App;
